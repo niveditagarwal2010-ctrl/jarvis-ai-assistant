@@ -1,487 +1,441 @@
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#030914">
-<title>J.A.R.V.I.S. — Holographic Interface</title>
-
+<!-- JARVIS 3D OBJECT LAB: paste before </body> -->
 <style>
-:root {
-  --cyan: #00eaff;
-  --blue: #1688ff;
-  --muted: #6698b8;
-  --line: rgba(0,234,255,.28);
-  --panel: rgba(5,22,42,.78);
+#j3d {
+  background: radial-gradient(circle, #07314b, #020711 75%);
+  color: #baf8ff;
+  border: 1px solid #00dffc;
+  padding: 18px;
+  margin: 25px auto;
+  max-width: 1100px;
+  font-family: Arial, sans-serif;
+  box-shadow: 0 0 22px #00dffc22;
 }
-* { box-sizing: border-box; }
-body {
-  margin: 0; min-height: 100vh; color: #d9faff;
-  background:
-    radial-gradient(ellipse at 50% 42%, #092b49 0%, #041322 38%, #020711 78%);
-  font-family: "Segoe UI", Arial, sans-serif;
-  overflow-x: hidden;
+#j3d h2 { color: #00eaff; letter-spacing: 3px; }
+#j3d .j3d-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(220px, 1fr);
+  gap: 16px;
 }
-body::before {
-  content: ""; position: fixed; inset: 0; z-index: -1;
-  background-image:
-    linear-gradient(rgba(0,234,255,.045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,234,255,.045) 1px, transparent 1px);
-  background-size: 34px 34px;
-  mask-image: linear-gradient(to bottom, black, transparent 95%);
-}
-body::after {
-  content: ""; position: fixed; inset: 0; z-index: 5;
-  pointer-events: none; opacity: .16;
-  background: repeating-linear-gradient(
-    to bottom, transparent 0px, transparent 3px,
-    rgba(0,234,255,.08) 4px
-  );
-}
-header {
-  min-height: 76px; padding: 18px 5%;
-  display: flex; justify-content: space-between; align-items: center;
-  flex-wrap: wrap; gap: 14px;
-  border-bottom: 1px solid var(--line);
-  background: rgba(2,9,20,.82);
-}
-.brand { color: var(--cyan); font-size: 21px; font-weight: 800; letter-spacing: 4px; }
-.brand small { display: block; margin-top: 5px; color: var(--muted); font-size: 9px; letter-spacing: 3px; }
-.status { font-size: 11px; letter-spacing: 2px; color: #8cffe4; }
-.dot {
-  display: inline-block; width: 7px; height: 7px; margin-right: 8px;
-  border-radius: 50%; background: #36ffb4;
-  box-shadow: 0 0 12px #36ffb4;
-}
-main { max-width: 1250px; margin: auto; padding: 30px 20px 50px; }
-.heading { text-align: center; margin: 6px 0 24px; }
-h1 {
-  margin: 0; font-size: clamp(30px,5vw,56px);
-  letter-spacing: clamp(4px,1vw,11px); color: #e3fcff;
-  text-shadow: 0 0 22px #00bfff65;
-}
-.subtitle { color: var(--muted); font-size: 10px; letter-spacing: 4px; margin-top: 12px; }
-.dashboard {
-  display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.45fr) minmax(0,1fr);
-  gap: 16px; align-items: stretch;
-}
-.panel {
-  position: relative; padding: 20px;
-  background: linear-gradient(145deg, rgba(8,34,57,.88), var(--panel));
-  border: 1px solid var(--line);
-  clip-path: polygon(0 0, calc(100% - 17px) 0, 100% 17px, 100% 100%, 17px 100%, 0 calc(100% - 17px));
+#j3d .j3d-view {
+  position: relative;
   min-width: 0;
+  border: 1px solid #087f9c;
+  background: #020914;
 }
-.panel::before {
-  content: ""; position: absolute; top: 0; left: 0;
-  width: 45px; height: 2px; background: var(--cyan);
-  box-shadow: 0 0 12px var(--cyan);
+#j3d canvas { display: block; width: 100%; height: 380px; touch-action: none; }
+#j3d .j3d-label {
+  position: absolute; top: 10px; left: 12px;
+  font-size: 10px; letter-spacing: 2px;
+  color: #00eaff; pointer-events: none;
 }
-.panel-title {
-  color: var(--cyan); font-size: 11px; letter-spacing: 2px;
-  margin: 0 0 20px; font-weight: 700;
+#j3d button, #j3d .j3d-upload {
+  display: inline-block; padding: 11px;
+  margin: 5px 3px 5px 0; cursor: pointer;
+  background: #06283e; border: 1px solid #00dffc;
+  color: #c6fbff; font-weight: bold; font-size: 11px;
 }
-.reactor-area {
-  display: grid; place-items: center;
-  min-height: 310px; position: relative; overflow: hidden;
+#j3d button:hover, #j3d .j3d-upload:hover {
+  background: #07516b;
 }
-.reactor {
-  width: min(65vw,285px); aspect-ratio: 1;
-  position: relative; display: grid; place-items: center;
-  border-radius: 50%; border: 1px solid #00eaff8a;
-  box-shadow: 0 0 24px #00eaff28, inset 0 0 25px #00eaff14;
+#j3d input[type=file] { max-width: 100%; margin: 12px 0; }
+#j3d .j3d-info {
+  border: 1px solid #12475d; padding: 12px;
+  margin: 10px 0; font-size: 12px; line-height: 1.7;
+  overflow-wrap: anywhere;
 }
-.ring {
-  position: absolute; border-radius: 50%;
-  border: 1px solid var(--cyan);
-}
-.ring.one {
-  inset: 5%; border-style: dashed;
-  animation: rotate 24s linear infinite;
-}
-.ring.two {
-  inset: 14%; border-width: 2px; border-color: #087bff;
-  border-left-color: transparent; border-right-color: transparent;
-  animation: rotate 8s linear infinite reverse;
-}
-.ring.three {
-  inset: 24%; border-style: dashed; border-color: #6bdfff;
-  animation: rotate 14s linear infinite;
-}
-.ring.four {
-  inset: 32%; border: 2px solid #00eaff;
-  box-shadow: 0 0 25px #00eaff66, inset 0 0 18px #00eaff44;
-}
-.core {
-  width: 28%; aspect-ratio: 1; border-radius: 50%; z-index: 1;
-  background: radial-gradient(circle, #fff 0%, #a5ffff 15%, #05cfff 42%, #0758a4 70%, #041b38 100%);
-  box-shadow: 0 0 22px #00eaff, 0 0 55px #008cff88;
-  animation: breathe 2.2s ease-in-out infinite alternate;
-}
-.reactor::after {
-  content: ""; position: absolute; inset: 0; border-radius: 50%;
-  background: conic-gradient(transparent, #00eaff55, transparent 25%);
-  animation: rotate 7s linear infinite;
-}
-@keyframes rotate { to { transform: rotate(360deg); } }
-@keyframes breathe { to { transform: scale(1.12); filter: brightness(1.35); } }
-.listening .core { animation: listenPulse .45s ease-in-out infinite alternate; }
-@keyframes listenPulse { to { transform: scale(1.25); filter: brightness(1.7); } }
-.orbit-label {
-  position: absolute; bottom: 5px; text-align: center;
-  color: var(--cyan); font-size: 10px; letter-spacing: 3px;
-}
-.wave {
-  display: flex; justify-content: center; align-items: center;
-  height: 35px; gap: 4px; margin: 10px 0;
-}
-.wave span {
-  width: 3px; height: 7px; background: var(--cyan);
-  box-shadow: 0 0 8px var(--cyan); border-radius: 3px;
-}
-.listening .wave span { animation: wave 0.6s ease-in-out infinite alternate; }
-.wave span:nth-child(3n) { animation-delay: .2s; }
-.wave span:nth-child(2n) { animation-delay: .35s; }
-@keyframes wave { to { height: 29px; } }
-.controls { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 16px; }
-button {
-  cursor: pointer; border: 1px solid #00dff5;
-  color: #c8faff; background: #06243b;
-  padding: 12px 14px; font-size: 10px; letter-spacing: 1px;
-  font-weight: 700; transition: .2s;
-}
-button:hover { background: #075071; box-shadow: 0 0 15px #00eaff40; }
-button.primary { color: #00121c; background: var(--cyan); }
-button.primary:hover { background: #8bffff; }
-button:focus-visible { outline: 2px solid white; outline-offset: 3px; }
-.readout {
-  background: rgba(0,8,20,.6); border-left: 2px solid var(--cyan);
-  padding: 14px; margin-top: 18px; min-height: 86px;
-  font-size: 13px; line-height: 1.6; overflow-wrap: anywhere;
-}
-.readout small { display: block; color: var(--muted); font-size: 9px; letter-spacing: 2px; margin-bottom: 8px; }
-.muted { color: var(--muted); font-size: 11px; line-height: 1.7; }
-.clock { color: var(--cyan); font-size: clamp(24px,3vw,34px); font-variant-numeric: tabular-nums; }
-.date { color: #8fb6d0; font-size: 12px; margin: 8px 0 22px; }
-.metric {
-  padding: 12px 0; border-bottom: 1px solid rgba(0,234,255,.13);
-}
-.metric small { display: block; color: var(--muted); font-size: 9px; letter-spacing: 1.5px; margin-bottom: 8px; }
-.metric strong { font-size: 12px; color: #d9faff; overflow-wrap: anywhere; }
-.good { color: #69ffd0 !important; }
-.command {
-  font-size: 12px; color: #a5c9dc; padding: 9px 0;
-  border-bottom: 1px solid rgba(0,234,255,.12);
-}
-.command b { color: var(--cyan); font-weight: 500; }
-.lower { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
-.project-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
-.project {
-  border: 1px solid rgba(0,234,255,.22); padding: 14px;
-  background: rgba(0,15,32,.5);
-}
-.project strong { color: var(--cyan); font-size: 11px; letter-spacing: 1px; }
-.project p { color: #8fb4cb; font-size: 11px; line-height: 1.6; margin-bottom: 0; }
-footer {
-  text-align: center; padding: 22px; border-top: 1px solid var(--line);
-  color: #50758f; font-size: 9px; letter-spacing: 3px;
-}
-@media(max-width:900px) {
-  .dashboard { grid-template-columns: 1fr 1fr; }
-  .center-panel { grid-column: 1 / -1; grid-row: 1; }
-  .reactor-area { min-height: 270px; }
-}
-@media(max-width:600px) {
-  header { justify-content: center; text-align: center; }
-  .dashboard, .lower { grid-template-columns: 1fr; }
-  .center-panel { grid-column: auto; }
-  main { padding: 24px 12px 35px; }
-  .reactor-area { min-height: 270px; }
-  .controls button { flex: 1 1 42%; }
-  .project-grid { grid-template-columns: 1fr; }
-}
-@media(prefers-reduced-motion:reduce) {
-  *,*::before,*::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+#j3d .j3d-muted { color: #7caabd; font-size: 12px; line-height: 1.7; }
+#j3d button:disabled { opacity: .5; cursor: wait; }
+@media(max-width:650px) {
+  #j3d .j3d-layout { grid-template-columns: 1fr; }
+  #j3d canvas { height: 300px; }
 }
 </style>
-</head>
 
-<body>
-<header>
-  <div class="brand">◈ J.A.R.V.I.S.<small>PERSONAL INTELLIGENCE SYSTEM</small></div>
-  <div class="status" id="status"><span class="dot"></span>SYSTEM STANDBY</div>
-</header>
+<section id="j3d">
+  <h2>◈ 3D OBJECT LAB</h2>
+  <p class="j3d-muted">
+    Upload a photo, explore its holographic projection,
+    and control the view with hand gestures.
+  </p>
 
-<main>
-  <div class="heading">
-    <h1>J.A.R.V.I.S.</h1>
-    <div class="subtitle">JUST A RATHER VERY INTELLIGENT SYSTEM</div>
+  <div class="j3d-layout">
+    <div>
+      <div class="j3d-view">
+        <div class="j3d-label">HOLOGRAPHIC PROJECTION</div>
+        <canvas id="j3dCanvas"></canvas>
+      </div>
+
+      <input id="j3dFile" type="file" accept="image/*">
+      <div>
+        <button id="j3dReset">RESET VIEW</button>
+        <button id="j3dAuto">AUTO ROTATE: OFF</button>
+      </div>
+      <p class="j3d-muted">
+        Drag on the viewer to rotate. Scroll to zoom.
+      </p>
+    </div>
+
+    <div>
+      <div class="j3d-info">
+        <b>OBJECT STATUS</b>
+        <p id="j3dStatus">Waiting for photo...</p>
+      </div>
+
+      <div class="j3d-info">
+        <b>HAND TRACKING</b>
+        <p id="j3dHandStatus">Camera is off.</p>
+        <button id="j3dStart">START CAMERA</button>
+        <button id="j3dStop">STOP CAMERA</button>
+        <video id="j3dVideo" autoplay playsinline muted
+          style="display:none;width:100%;max-width:240px"></video>
+      </div>
+
+      <div class="j3d-info">
+        <b>GESTURE CONTROLS</b>
+        <p class="j3d-muted">
+          Move hand left/right: rotate horizontally.<br>
+          Move hand up/down: tilt vertically.<br>
+          Pinch thumb and index finger: zoom in/out.
+        </p>
+      </div>
+
+      <div class="j3d-info">
+        <b>ZOOM</b><br>
+        <input id="j3dZoom" type="range"
+          min="0.6" max="1.8" value="1" step="0.05">
+      </div>
+    </div>
   </div>
+</section>
 
-  <div class="dashboard">
-    <section class="panel">
-      <h2 class="panel-title">01 / SYSTEM TELEMETRY</h2>
-      <div class="metric"><small>CORE STATUS</small><strong id="coreStatus">STANDBY</strong></div>
-      <div class="metric"><small>VOICE ENGINE</small><strong id="voiceStatus">READY</strong></div>
-      <div class="metric"><small>INTERFACE</small><strong class="good">OPERATIONAL</strong></div>
-      <div class="metric"><small>COMMANDS PROCESSED</small><strong id="count">000</strong></div>
-      <div class="metric"><small>LOCAL TIME</small><strong id="miniClock">--:--:--</strong></div>
-      <p class="muted">Browser-based system diagnostics. Hardware access is restricted by browser security.</p>
-    </section>
+<script type="module">
+import * as THREE from
+  "https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js";
 
-    <section class="panel center-panel">
-      <h2 class="panel-title">◈ ARC REACTOR / MAINFRAME</h2>
-      <div class="reactor-area" id="reactorArea">
-        <div class="reactor" id="reactor">
-          <div class="ring one"></div>
-          <div class="ring two"></div>
-          <div class="ring three"></div>
-          <div class="ring four"></div>
-          <div class="core"></div>
-        </div>
-        <div class="orbit-label" id="mode">AWAITING INITIALIZATION</div>
-      </div>
-      <div class="wave" id="wave" aria-hidden="true">
-        <span></span><span></span><span></span><span></span><span></span>
-        <span></span><span></span><span></span><span></span><span></span>
-        <span></span><span></span><span></span><span></span><span></span>
-        <span></span><span></span><span></span><span></span><span></span>
-        <span></span><span></span><span></span><span></span><span></span>
-      </div>
-      <div class="controls">
-        <button class="primary" id="init">INITIALIZE</button>
-        <button id="mic">🎙 ACTIVATE VOICE</button>
-        <button id="stop">STOP LISTENING</button>
-      </div>
-      <div class="readout" aria-live="polite">
-        <small>JARVIS RESPONSE</small>
-        <div id="reply">All systems standing by. Initialize the interface to begin.</div>
-        <div class="muted" id="heard">COMMAND INPUT: NONE</div>
-      </div>
-    </section>
+import {
+  FilesetResolver,
+  HandLandmarker
+} from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14";
 
-    <section class="panel">
-      <h2 class="panel-title">02 / COMMAND PROTOCOL</h2>
-      <div class="command"><b>›</b> "What time is it?"</div>
-      <div class="command"><b>›</b> "What's today's date?"</div>
-      <div class="command"><b>›</b> "Open YouTube"</div>
-      <div class="command"><b>›</b> "Open Google"</div>
-      <div class="command"><b>›</b> "Search for robotics"</div>
-      <div class="command"><b>›</b> "Open GitHub"</div>
-      <div class="command"><b>›</b> "System status"</div>
-      <div class="command"><b>›</b> "Help"</div>
-      <p class="muted">Select ACTIVATE VOICE and speak clearly in English. Voice recognition availability depends on your browser.</p>
-    </section>
-  </div>
-
-  <div class="lower">
-    <section class="panel">
-      <h2 class="panel-title">03 / PERSONAL PROJECTS</h2>
-      <div class="project-grid">
-        <div class="project">
-          <strong>JARVIS AI</strong>
-          <p>A personal assistant interface with voice commands and a futuristic HUD.</p>
-        </div>
-        <div class="project">
-          <strong>GHOST BIN</strong>
-          <p>A waste reuse and recycling app concept focused on giving materials a second life.</p>
-        </div>
-        <div class="project">
-          <strong>AI & ROBOTICS</strong>
-          <p>Exploring intelligent systems, automation and human-computer interaction.</p>
-        </div>
-        <div class="project">
-          <strong>TECH LAB</strong>
-          <p>Space for future experiments, prototypes and coding projects.</p>
-        </div>
-      </div>
-    </section>
-
-    <section class="panel">
-      <h2 class="panel-title">04 / CHRONOS & EVENT LOG</h2>
-      <div class="clock" id="clock">--:--:--</div>
-      <div class="date" id="date">Synchronizing local clock...</div>
-      <div class="metric"><small>LAST EVENT</small><strong id="lastEvent">Interface initialized on page load</strong></div>
-      <div class="metric"><small>SECURITY MODE</small><strong class="good">BROWSER SANDBOX</strong></div>
-      <p class="muted">This dashboard does not access private files or personal device data.</p>
-    </section>
-  </div>
-</main>
-
-<footer>J.A.R.V.I.S. // HOLOGRAPHIC USER INTERFACE // SYSTEMS ONLINE</footer>
-
-<script>
 const $ = id => document.getElementById(id);
-let initialized = false;
-let listening = false;
-let keepListening = false;
-let recognition = null;
-let commandCount = 0;
+const canvas = $("j3dCanvas");
+const renderer = new THREE.WebGLRenderer({
+  canvas, alpha: true, antialias: true
+});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.setClearColor(0x000000, 0);
 
-function eventLog(message) {
-  $("lastEvent").textContent = message;
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100);
+camera.position.z = 5;
+
+scene.add(new THREE.AmbientLight(0x9ceeff, 2));
+
+const light = new THREE.PointLight(0x00eaff, 25);
+light.position.set(2, 3, 5);
+scene.add(light);
+
+const object = new THREE.Group();
+scene.add(object);
+
+// The uploaded photo is displayed on a 3D plane.
+const geometry = new THREE.PlaneGeometry(3.2, 2.4, 24, 24);
+const material = new THREE.MeshBasicMaterial({
+  color: 0x00dfff,
+  wireframe: true,
+  transparent: true,
+  opacity: 0.65,
+  side: THREE.DoubleSide
+});
+const surface = new THREE.Mesh(geometry, material);
+object.add(surface);
+
+const frame = new THREE.LineSegments(
+  new THREE.EdgesGeometry(new THREE.PlaneGeometry(3.25, 2.45)),
+  new THREE.LineBasicMaterial({ color: 0x00eaff })
+);
+object.add(frame);
+
+let texture = null;
+let zoom = 1;
+let autoRotate = false;
+let dragging = false;
+let previousX = 0, previousY = 0;
+let stream = null, tracker = null, tracking = false;
+let lastVideoTime = -1;
+let previousHand = null, previousPinch = null;
+let animationId = null;
+
+function resize() {
+  const width = canvas.clientWidth || 320;
+  const height = canvas.clientHeight || 300;
+  renderer.setSize(width, height, false);
+  camera.aspect = width / height;
+  camera.updateProjectionMatrix();
+}
+new ResizeObserver(resize).observe(canvas);
+resize();
+
+function setStatus(message) {
+  $("j3dStatus").textContent = message;
 }
 
-function updateClock() {
-  const now = new Date();
-  $("clock").textContent = now.toLocaleTimeString("en-IN");
-  $("miniClock").textContent = now.toLocaleTimeString("en-IN");
-  $("date").textContent = now.toLocaleDateString("en-IN", {
-    weekday: "long", day: "numeric", month: "long", year: "numeric"
-  });
-}
-updateClock();
-setInterval(updateClock, 1000);
-
-function speak(message) {
-  $("reply").textContent = message;
-  eventLog("Response generated");
-  if (!("speechSynthesis" in window)) return;
-  window.speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(message);
-  utterance.lang = "en-IN";
-  utterance.rate = 0.96;
-  utterance.pitch = 0.9;
-  utterance.onstart = () => $("status").innerHTML = '<span class="dot"></span>VOICE OUTPUT ACTIVE';
-  utterance.onend = () => {
-    $("status").innerHTML = '<span class="dot"></span>' +
-      (listening ? "VOICE INPUT ACTIVE" : "SYSTEM ONLINE");
-  };
-  window.speechSynthesis.speak(utterance);
-}
-
-function setupRecognition() {
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SpeechRecognition) {
-    $("voiceStatus").textContent = "UNAVAILABLE";
-    $("heard").textContent = "Speech recognition is unsupported. Try updated Chrome.";
-    return false;
-  }
-  recognition = new SpeechRecognition();
-  recognition.lang = "en-IN";
-  recognition.continuous = true;
-  recognition.interimResults = false;
-
-  recognition.onstart = () => {
-    listening = true;
-    $("reactorArea").classList.add("listening");
-    $("status").innerHTML = '<span class="dot"></span>VOICE INPUT ACTIVE';
-    $("mode").textContent = "LISTENING FOR COMMANDS";
-    $("voiceStatus").textContent = "LISTENING";
-  };
-
-  recognition.onresult = event => {
-    const result = event.results[event.results.length - 1];
-    if (result && result.isFinal) handleCommand(result[0].transcript);
-  };
-
-  recognition.onerror = event => {
-    $("heard").textContent = "VOICE ENGINE: " + event.error;
-    eventLog("Voice recognition: " + event.error);
-    if (event.error === "not-allowed" || event.error === "service-not-allowed") {
-      keepListening = false;
-      $("voiceStatus").textContent = "MIC PERMISSION NEEDED";
-    }
-  };
-
-  recognition.onend = () => {
-    listening = false;
-    $("reactorArea").classList.remove("listening");
-    if (keepListening && initialized) {
-      try { recognition.start(); } catch (e) {}
-    } else {
-      $("voiceStatus").textContent = "READY";
-      $("mode").textContent = initialized ? "SYSTEM ONLINE" : "AWAITING INITIALIZATION";
-      $("status").innerHTML = '<span class="dot"></span>' +
-        (initialized ? "SYSTEM ONLINE" : "SYSTEM STANDBY");
-    }
-  };
-  return true;
-}
-
-function startListening() {
-  if (!initialized) {
-    speak("Please initialize the system first.");
-    return;
-  }
-  if (!recognition && !setupRecognition()) {
-    speak("Voice recognition is not supported in this browser.");
-    return;
-  }
-  if (listening) return;
-  keepListening = true;
-  try { recognition.start(); }
-  catch (e) { $("heard").textContent = "Microphone is starting. Please try again."; }
-}
-
-function stopListening() {
-  keepListening = false;
-  if (recognition && listening) recognition.stop();
-  listening = false;
-  $("reactorArea").classList.remove("listening");
-  $("voiceStatus").textContent = "READY";
-  $("mode").textContent = initialized ? "SYSTEM ONLINE" : "AWAITING INITIALIZATION";
-  $("status").innerHTML = '<span class="dot"></span>' +
-    (initialized ? "SYSTEM ONLINE" : "SYSTEM STANDBY");
-  eventLog("Voice listening stopped");
-}
-
-function handleCommand(raw) {
-  $("heard").textContent = 'COMMAND INPUT: "' + raw + '"';
-  commandCount++;
-  $("count").textContent = String(commandCount).padStart(3, "0");
-  const command = raw.toLowerCase().trim().replace(/^hey jarvis[,\s]*/, "");
-
-  if (command.includes("stop listening") || command === "go to sleep") {
-    speak("Voice listening stopped. I will be ready when you need me.");
-    stopListening();
+function loadPhoto(file) {
+  if (!file || !file.type.startsWith("image/")) {
+    setStatus("Please select an image file.");
     return;
   }
 
-  if (command.includes("time")) {
-    speak("The current time is " + new Date().toLocaleTimeString("en-IN"));
-  } else if (command.includes("date") || command.includes("today")) {
-    speak("Today is " + new Date().toLocaleDateString("en-IN", {
-      weekday: "long", day: "numeric", month: "long", year: "numeric"
-    }));
-  } else if (command.includes("open youtube")) {
-    speak("Opening YouTube.");
-    window.open("https://www.youtube.com/", "_blank", "noopener");
-  } else if (command.includes("open google")) {
-    speak("Opening Google.");
-    window.open("https://www.google.com/", "_blank", "noopener");
-  } else if (command.includes("open github")) {
-    speak("Opening GitHub.");
-    window.open("https://github.com/", "_blank", "noopener");
-  } else if (command.startsWith("search for ")) {
-    const query = command.slice(11).trim();
-    if (query) {
-      speak("Searching Google for " + query);
-      window.open("https://www.google.com/search?q=" + encodeURIComponent(query), "_blank", "noopener");
-    } else speak("Please tell me what to search for.");
-  } else if (command.includes("help") || command.includes("what can you do")) {
-    speak("I can tell you the time and date, open YouTube, Google and GitHub, and search Google. More commands can be added.");
-  } else if (command.includes("hello") || command.includes("hi jarvis")) {
-    speak("Hello. All interface systems are ready.");
-  } else if (command.includes("status")) {
-    speak("The interface is online. Voice recognition is active when the microphone is enabled.");
-  } else {
-    speak("I heard you say " + raw + ". That command is not programmed yet. Say help to hear the available commands.");
-  }
+  const url = URL.createObjectURL(file);
+  const image = new Image();
+
+  image.onload = () => {
+    if (texture) texture.dispose();
+
+    texture = new THREE.Texture(image);
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.needsUpdate = true;
+
+    // Preserve the image proportions.
+    const aspect = image.naturalWidth / image.naturalHeight;
+    const height = 2.4;
+    const width = Math.max(0.5, Math.min(3.5, height * aspect));
+
+    surface.geometry.dispose();
+    surface.geometry = new THREE.PlaneGeometry(width, height, 24, 24);
+    material.map = texture;
+    material.color.set(0xffffff);
+    material.wireframe = false;
+    material.opacity = 1;
+    material.needsUpdate = true;
+
+    frame.geometry.dispose();
+    frame.geometry = new THREE.EdgesGeometry(
+      new THREE.PlaneGeometry(width + 0.05, height + 0.05)
+    );
+
+    URL.revokeObjectURL(url);
+    setStatus(
+      "Photo loaded. Interactive 3D surface ready. " +
+      "This is a flat photo projection, not a generated 3D model."
+    );
+  };
+
+  image.onerror = () => {
+    URL.revokeObjectURL(url);
+    setStatus("Could not load that image. Try another photo.");
+  };
+
+  image.src = url;
 }
 
-$("init").addEventListener("click", () => {
-  initialized = true;
-  $("coreStatus").textContent = "ONLINE";
-  $("mode").textContent = "SYSTEM INITIALIZED";
-  $("status").innerHTML = '<span class="dot"></span>SYSTEM ONLINE';
-  eventLog("Mainframe initialized");
-  speak("JARVIS systems are online. Activate voice input when you are ready.");
+$("j3dFile").addEventListener("change", event => {
+  loadPhoto(event.target.files[0]);
 });
 
-$("mic").addEventListener("click", startListening);
-$("stop").addEventListener("click", stopListening);
+function setZoom(value) {
+  zoom = Math.max(0.6, Math.min(1.8, value));
+  object.scale.setScalar(zoom);
+  $("j3dZoom").value = zoom;
+}
+$("j3dZoom").addEventListener("input", event => {
+  setZoom(Number(event.target.value));
+});
+
+$("j3dReset").addEventListener("click", () => {
+  object.rotation.set(0, 0, 0);
+  setZoom(1);
+});
+
+$("j3dAuto").addEventListener("click", event => {
+  autoRotate = !autoRotate;
+  event.currentTarget.textContent =
+    "AUTO ROTATE: " + (autoRotate ? "ON" : "OFF");
+});
+
+canvas.addEventListener("pointerdown", event => {
+  dragging = true;
+  previousX = event.clientX;
+  previousY = event.clientY;
+  canvas.setPointerCapture(event.pointerId);
+});
+canvas.addEventListener("pointermove", event => {
+  if (!dragging) return;
+  object.rotation.y += (event.clientX - previousX) * 0.01;
+  object.rotation.x += (event.clientY - previousY) * 0.01;
+  previousX = event.clientX;
+  previousY = event.clientY;
+});
+canvas.addEventListener("pointerup", () => dragging = false);
+canvas.addEventListener("pointercancel", () => dragging = false);
+
+canvas.addEventListener("wheel", event => {
+  event.preventDefault();
+  setZoom(zoom - event.deltaY * 0.001);
+}, { passive: false });
+
+function animate() {
+  animationId = requestAnimationFrame(animate);
+  if (autoRotate && !dragging && !tracking) {
+    object.rotation.y += 0.004;
+  }
+  renderer.render(scene, camera);
+}
+animate();
+
+async function startCamera() {
+  if (tracking) return;
+
+  $("j3dStart").disabled = true;
+  $("j3dHandStatus").textContent = "Loading hand-tracking model...";
+
+  try {
+    if (!navigator.mediaDevices?.getUserMedia) {
+      throw new Error("Camera requires HTTPS and browser camera support.");
+    }
+
+    const vision = await FilesetResolver.forVisionTasks(
+      "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm"
+    );
+
+    try {
+      tracker = await HandLandmarker.createFromOptions(vision, {
+        baseOptions: {
+          modelAssetPath:
+            "https://storage.googleapis.com/mediapipe-models/" +
+            "hand_landmarker/hand_landmarker/float16/1/" +
+            "hand_landmarker.task",
+          delegate: "GPU"
+        },
+        runningMode: "VIDEO",
+        numHands: 1
+      });
+    } catch {
+      tracker = await HandLandmarker.createFromOptions(vision, {
+        baseOptions: {
+          modelAssetPath:
+            "https://storage.googleapis.com/mediapipe-models/" +
+            "hand_landmarker/hand_landmarker/float16/1/" +
+            "hand_landmarker.task"
+        },
+        runningMode: "VIDEO",
+        numHands: 1
+      });
+    }
+
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: "user", width: 640, height: 480 },
+      audio: false
+    });
+
+    const video = $("j3dVideo");
+    video.srcObject = stream;
+    video.style.display = "block";
+    await video.play();
+
+    tracking = true;
+    lastVideoTime = -1;
+    previousHand = null;
+    previousPinch = null;
+
+    $("j3dHandStatus").textContent =
+      "Camera active. Show one hand clearly.";
+    trackHand();
+  } catch (error) {
+    $("j3dHandStatus").textContent =
+      "Could not start: " + error.message +
+      ". Check camera permission and internet connection.";
+    stopCamera();
+  } finally {
+    $("j3dStart").disabled = false;
+  }
+}
+
+function trackHand() {
+  if (!tracking || !tracker) return;
+
+  const video = $("j3dVideo");
+
+  if (video.readyState >= 2 && video.currentTime !== lastVideoTime) {
+    lastVideoTime = video.currentTime;
+
+    try {
+      const result = tracker.detectForVideo(video, performance.now());
+      const hands = result.landmarks;
+
+      if (hands && hands.length > 0) {
+        const points = hands[0];
+        const index = points[8];
+        const thumb = points[4];
+
+        // Mirror the horizontal movement to feel natural.
+        const x = 1 - index.x;
+        const y = index.y;
+
+        if (previousHand) {
+          object.rotation.y += (x - previousHand.x) * 4;
+          object.rotation.x += (y - previousHand.y) * 3;
+        }
+        previousHand = { x, y };
+
+        // Pinch distance controls the zoom.
+        const distance = Math.hypot(
+          index.x - thumb.x, index.y - thumb.y
+        );
+
+        if (previousPinch !== null) {
+          const change = distance - previousPinch;
+          if (Math.abs(change) > 0.008) {
+            setZoom(zoom + change * 1.5);
+          }
+        }
+
+        previousPinch = distance;
+        $("j3dHandStatus").textContent =
+          "Hand detected. Move to rotate; pinch to zoom.";
+      } else {
+        previousHand = null;
+        previousPinch = null;
+        $("j3dHandStatus").textContent =
+          "Camera active. Show your hand to the camera.";
+      }
+    } catch {
+      $("j3dHandStatus").textContent =
+        "Tracking error. Try better lighting.";
+    }
+  }
+
+  animationId = requestAnimationFrame(trackHand);
+}
+
+function stopCamera() {
+  tracking = false;
+  previousHand = null;
+  previousPinch = null;
+
+  if (stream) {
+    stream.getTracks().forEach(track => track.stop());
+    stream = null;
+  }
+
+  const video = $("j3dVideo");
+  video.pause();
+  video.srcObject = null;
+  video.style.display = "none";
+
+  if (tracker) {
+    tracker.close();
+    tracker = null;
+  }
+
+  $("j3dHandStatus").textContent = "Camera is off.";
+}
+
+$("j3dStart").addEventListener("click", startCamera);
+$("j3dStop").addEventListener("click", stopCamera);
+window.addEventListener("beforeunload", stopCamera);
 </script>
+<!-- END JARVIS 3D OBJECT LAB -->
 </body>
 </html>
