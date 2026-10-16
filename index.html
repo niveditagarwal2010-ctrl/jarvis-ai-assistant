@@ -4,12 +4,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>J.A.R.V.I.S. | AI Interface</title>
+<title>J.A.R.V.I.S. | AI Command Center</title>
 <style>
-:root{--cyan:#00eaff;--blue:#087cff;--bg:#030913;--panel:rgba(4,22,39,.86)}
+:root{--cyan:#00eaff;--blue:#087cff;--bg:#030913;--panel:rgba(4,22,39,.9)}
 *{box-sizing:border-box}
-body{margin:0;background:radial-gradient(ellipse at center,#09233b 0%,#030913 65%);color:#c9faff;font-family:Arial,sans-serif;min-height:100vh}
-header{padding:22px 5%;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #00eaff55;gap:12px;flex-wrap:wrap}
+body{margin:0;background:radial-gradient(ellipse at center,#09233b,#030913 70%);color:#c9faff;font-family:Arial,sans-serif;min-height:100vh}
+header{padding:22px 5%;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;border-bottom:1px solid #00eaff55}
 .logo{font-size:clamp(20px,4vw,30px);font-weight:bold;letter-spacing:5px;color:var(--cyan);text-shadow:0 0 15px #00eaff}
 .status{font-size:11px;letter-spacing:2px;color:#74ffc2}
 main{max-width:1250px;margin:auto;padding:25px 18px}
@@ -24,7 +24,7 @@ h1{font-size:clamp(24px,4vw,38px);letter-spacing:3px;margin-bottom:5px}
 .hint{position:absolute;bottom:10px;left:0;right:0;text-align:center;color:#83b9ca;font-size:11px;pointer-events:none}
 .controls{display:flex;flex-wrap:wrap;gap:9px;margin-top:14px}
 button,.upload{background:#06233a;color:var(--cyan);border:1px solid #00cfff88;padding:11px 14px;border-radius:5px;cursor:pointer;font-size:11px;letter-spacing:1px}
-button:hover,.upload:hover{background:#0b3b59;box-shadow:0 0 12px #00cfff44}
+button:hover,.upload:hover{background:#0b3b59}
 button:disabled{opacity:.5;cursor:wait}
 input[type=file]{display:none}
 input[type=range]{width:100%;accent-color:var(--cyan)}
@@ -32,9 +32,9 @@ input[type=range]{width:100%;accent-color:var(--cyan)}
 .readouts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .readout{border:1px solid #00eaff22;padding:13px;border-radius:6px}
 .readout small{display:block;color:#6f9eaf;font-size:10px;letter-spacing:1px;margin-bottom:8px}
-.readout strong{font-size:14px;color:var(--cyan)}
+.readout strong{font-size:14px;color:var(--cyan);overflow-wrap:anywhere}
 .line{height:1px;background:#00eaff26;margin:18px 0}
-#video{position:fixed;left:-9999px;width:320px;height:240px}
+#video{position:fixed;left:-9999px;width:320px;height:240px;opacity:0;pointer-events:none}
 .footer{text-align:center;padding:30px;color:#537e91;font-size:10px;letter-spacing:2px}
 ul{padding-left:17px;color:#91bdca;font-size:12px;line-height:2}
 @media(max-width:760px){.grid{grid-template-columns:1fr}.viewer{height:320px}header{padding:18px}.panel{padding:13px}}
@@ -53,19 +53,17 @@ ul{padding-left:17px;color:#91bdca;font-size:12px;line-height:2}
   <div class="grid">
     <section class="panel">
       <h2>01 / OBJECT VIEWER</h2>
-      <div class="viewer" id="viewer">
+      <div class="viewer">
         <canvas id="view"></canvas>
         <div class="overlay">LIVE VISUALIZATION</div>
         <div class="hint" id="hint">UPLOAD A PHOTO TO BEGIN</div>
       </div>
-
       <div class="controls">
         <label class="upload" for="photo">UPLOAD PHOTO</label>
         <input id="photo" type="file" accept="image/*">
         <button id="reset">RESET VIEW</button>
         <button id="auto">AUTO ROTATE: OFF</button>
       </div>
-
       <div class="line"></div>
       <label for="zoom" style="font-size:11px">VIEW ZOOM</label>
       <input id="zoom" type="range" min="0.6" max="2.5" step="0.05" value="1">
@@ -75,12 +73,11 @@ ul{padding-left:17px;color:#91bdca;font-size:12px;line-height:2}
     <aside class="panel">
       <h2>02 / SYSTEM TELEMETRY</h2>
       <div class="readouts">
-        <div class="readout"><small>RENDER ENGINE</small><strong id="renderStatus">STARTING</strong></div>
+        <div class="readout"><small>RENDER ENGINE</small><strong id="renderStatus">READY</strong></div>
         <div class="readout"><small>CAMERA</small><strong id="cameraStatus">OFFLINE</strong></div>
         <div class="readout"><small>HAND TRACKING</small><strong id="handStatus">STANDBY</strong></div>
         <div class="readout"><small>OBJECT MODE</small><strong>PHOTO PLANE</strong></div>
       </div>
-
       <div class="line"></div>
       <h2>03 / GESTURE CONTROL</h2>
       <div class="controls">
@@ -90,7 +87,7 @@ ul{padding-left:17px;color:#91bdca;font-size:12px;line-height:2}
       <ul>
         <li>Move your index finger to rotate.</li>
         <li>Pinch thumb and index finger to zoom.</li>
-        <li>Drag the image with your mouse or finger.</li>
+        <li>Drag with mouse or touch to rotate.</li>
         <li>Use the slider for manual zoom.</li>
       </ul>
       <div class="line"></div>
@@ -98,8 +95,8 @@ ul{padding-left:17px;color:#91bdca;font-size:12px;line-height:2}
       <div style="font-size:12px;line-height:2;color:#91bdca">
         <div>● Image upload: READY</div>
         <div>● Gesture engine: ON DEMAND</div>
-        <div>● Local processing: BROWSER</div>
-        <div>● AI 3D reconstruction: NOT CONNECTED</div>
+        <div>● Camera: BROWSER PERMISSION</div>
+        <div>● True AI 3D: NOT CONNECTED</div>
       </div>
     </aside>
   </div>
@@ -112,374 +109,275 @@ ul{padding-left:17px;color:#91bdca;font-size:12px;line-height:2}
 const $ = id => document.getElementById(id);
 const canvas = $("view");
 const ctx = canvas.getContext("2d");
-const message = $("message");
 const video = $("video");
+const message = $("message");
 
-let image = null;
-let rotation = 0;
-let tilt = 0;
-let zoom = 1;
-let autoRotate = false;
-let dragging = false;
-let lastX = 0;
-let lastY = 0;
-let cameraStream = null;
-let handLandmarker = null;
-let visionReady = false;
-let tracking = false;
-let frameId = 0;
-let lastVideoTime = -1;
-let lastHandX = null;
-let lastHandY = null;
-let pinchZoom = null;
-let previousPinch = null;
-let lastTrackTime = 0;
+let image = null, rotation = 0, tilt = 0, zoom = 1;
+let autoRotate = false, dragging = false, lastX = 0, lastY = 0;
+let cameraStream = null, handLandmarker = null, tracking = false;
+let frameId = 0, lastVideoTime = -1;
+let lastHandX = null, lastHandY = null, previousPinch = null;
 
-function say(text) {
-  message.textContent = text;
-}
+function say(text){message.textContent=text;}
 
-function resize() {
-  const rect = canvas.getBoundingClientRect();
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  canvas.width = Math.max(1, Math.round(rect.width * dpr));
-  canvas.height = Math.max(1, Math.round(rect.height * dpr));
+function resize(){
+  const r=canvas.getBoundingClientRect();
+  const d=Math.min(window.devicePixelRatio||1,2);
+  canvas.width=Math.max(1,Math.round(r.width*d));
+  canvas.height=Math.max(1,Math.round(r.height*d));
   draw();
 }
 
-function draw() {
-  const w = canvas.width;
-  const h = canvas.height;
-  if (!w || !h) return;
-
-  ctx.clearRect(0, 0, w, h);
+function draw(){
+  const w=canvas.width,h=canvas.height;
+  if(!w||!h)return;
+  ctx.clearRect(0,0,w,h);
   ctx.save();
-  ctx.translate(w / 2, h / 2);
-  const scale = Math.min(w, h) / 300 * zoom;
-  ctx.scale(scale, scale);
+  ctx.translate(w/2,h/2);
+  ctx.scale(Math.min(w,h)/300*zoom,Math.min(w,h)/300*zoom);
 
-  // Holographic reference rings
-  ctx.strokeStyle = "rgba(0,234,255,.18)";
-  ctx.lineWidth = 0.7 / zoom;
-  for (let r = 55; r <= 130; r += 25) {
+  ctx.strokeStyle="rgba(0,234,255,.18)";
+  ctx.lineWidth=.7/zoom;
+  for(let r=55;r<=130;r+=25){
     ctx.beginPath();
-    ctx.ellipse(0, 0, r, r * 0.32, 0, 0, Math.PI * 2);
+    ctx.ellipse(0,0,r,r*.32,0,0,Math.PI*2);
     ctx.stroke();
   }
 
-  // Draw photo on a perspective-style 2D plane
-  if (image) {
+  if(image){
     ctx.save();
     ctx.rotate(rotation);
-    ctx.transform(1, 0, Math.sin(tilt) * 0.25, 1, 0, 0);
-    const maxW = 190;
-    const maxH = 190;
-    const ratio = Math.min(maxW / image.width, maxH / image.height);
-    const iw = image.width * ratio;
-    const ih = image.height * ratio;
-
-    ctx.shadowColor = "#00eaff";
-    ctx.shadowBlur = 18;
-    ctx.drawImage(image, -iw / 2, -ih / 2, iw, ih);
-    ctx.shadowBlur = 0;
-    ctx.strokeStyle = "#00eaff";
-    ctx.lineWidth = 1;
-    ctx.strokeRect(-iw / 2, -ih / 2, iw, ih);
+    ctx.transform(1,0,Math.sin(tilt)*.25,1,0,0);
+    const ratio=Math.min(190/image.width,190/image.height);
+    const iw=image.width*ratio,ih=image.height*ratio;
+    ctx.shadowColor="#00eaff";
+    ctx.shadowBlur=18;
+    ctx.drawImage(image,-iw/2,-ih/2,iw,ih);
+    ctx.shadowBlur=0;
+    ctx.strokeStyle="#00eaff";
+    ctx.lineWidth=1;
+    ctx.strokeRect(-iw/2,-ih/2,iw,ih);
     ctx.restore();
-  } else {
-    ctx.strokeStyle = "#00eaff";
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.arc(0, 0, 42, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.font = "10px Arial";
-    ctx.textAlign = "center";
-    ctx.fillStyle = "#00eaff";
-    ctx.fillText("JARVIS", 0, 4);
+  }else{
+    ctx.strokeStyle="#00eaff";
+    ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.arc(0,0,42,0,Math.PI*2);ctx.stroke();
+    ctx.fillStyle="#00eaff";ctx.font="10px Arial";ctx.textAlign="center";
+    ctx.fillText("JARVIS",0,4);
   }
-
   ctx.restore();
 }
 
-function animate() {
-  if (autoRotate && !dragging && !tracking) {
-    rotation += 0.006;
-  }
+function animate(){
+  if(autoRotate&&!dragging&&!tracking)rotation+=.006;
   draw();
   requestAnimationFrame(animate);
 }
 
-$("photo").addEventListener("change", event => {
-  const file = event.target.files?.[0];
-  if (!file) return;
-
-  if (!file.type.startsWith("image/")) {
-    say("Please choose a valid image file.");
-    return;
-  }
-
-  const url = URL.createObjectURL(file);
-  const nextImage = new Image();
-
-  nextImage.onload = () => {
-    if (image?._objectURL) URL.revokeObjectURL(image._objectURL);
-    nextImage._objectURL = url;
-    image = nextImage;
-    rotation = 0;
-    tilt = 0;
-    $("hint").textContent = "IMAGE LOADED // DRAG OR USE HAND GESTURES";
-    say("Image loaded. Drag to rotate or start the camera for gesture control.");
+$("photo").addEventListener("change",e=>{
+  const file=e.target.files?.[0];
+  if(!file)return;
+  if(!file.type.startsWith("image/")){say("Please select an image file.");return;}
+  const url=URL.createObjectURL(file),img=new Image();
+  img.onload=()=>{
+    if(image?.objectURL)URL.revokeObjectURL(image.objectURL);
+    img.objectURL=url;image=img;rotation=0;tilt=0;
+    $("hint").textContent="IMAGE LOADED // READY FOR GESTURES";
+    say("Image loaded. Drag to rotate or start the camera.");
     draw();
   };
-
-  nextImage.onerror = () => {
-    URL.revokeObjectURL(url);
-    say("Could not load this image. Try another file.");
-  };
-
-  nextImage.src = url;
+  img.onerror=()=>{URL.revokeObjectURL(url);say("Image failed to load.");};
+  img.src=url;
 });
 
-$("reset").addEventListener("click", () => {
-  rotation = 0;
-  tilt = 0;
-  zoom = 1;
-  $("zoom").value = "1";
-  draw();
-  say("View reset.");
+$("reset").onclick=()=>{rotation=0;tilt=0;zoom=1;$("zoom").value="1";draw();say("View reset.");};
+$("auto").onclick=()=>{
+  autoRotate=!autoRotate;
+  $("auto").textContent="AUTO ROTATE: "+(autoRotate?"ON":"OFF");
+};
+$("zoom").oninput=e=>{zoom=Number(e.target.value);draw();};
+
+canvas.addEventListener("pointerdown",e=>{
+  dragging=true;lastX=e.clientX;lastY=e.clientY;
+  canvas.setPointerCapture(e.pointerId);
 });
-
-$("auto").addEventListener("click", () => {
-  autoRotate = !autoRotate;
-  $("auto").textContent = `AUTO ROTATE: ${autoRotate ? "ON" : "OFF"}`;
+canvas.addEventListener("pointermove",e=>{
+  if(!dragging)return;
+  rotation+=(e.clientX-lastX)*.01;
+  tilt+=(e.clientY-lastY)*.008;
+  lastX=e.clientX;lastY=e.clientY;draw();
 });
+canvas.addEventListener("pointerup",()=>dragging=false);
+canvas.addEventListener("pointercancel",()=>dragging=false);
+canvas.addEventListener("wheel",e=>{
+  e.preventDefault();
+  zoom=Math.max(.6,Math.min(2.5,zoom-e.deltaY*.001));
+  $("zoom").value=String(zoom);draw();
+},{passive:false});
 
-$("zoom").addEventListener("input", event => {
-  zoom = Number(event.target.value);
-  draw();
-});
+async function loadHandTracker(){
+  if(handLandmarker)return handLandmarker;
+  $("handStatus").textContent="LOADING";
+  say("Loading hand tracking model. Please wait...");
 
-canvas.addEventListener("pointerdown", event => {
-  dragging = true;
-  lastX = event.clientX;
-  lastY = event.clientY;
-  canvas.setPointerCapture(event.pointerId);
-});
-
-canvas.addEventListener("pointermove", event => {
-  if (!dragging) return;
-  rotation += (event.clientX - lastX) * 0.01;
-  tilt += (event.clientY - lastY) * 0.008;
-  lastX = event.clientX;
-  lastY = event.clientY;
-  draw();
-});
-
-function stopDragging() {
-  dragging = false;
-}
-canvas.addEventListener("pointerup", stopDragging);
-canvas.addEventListener("pointercancel", stopDragging);
-
-canvas.addEventListener("wheel", event => {
-  event.preventDefault();
-  zoom = Math.max(0.6, Math.min(2.5, zoom - event.deltaY * 0.001));
-  $("zoom").value = String(zoom);
-  draw();
-}, { passive: false });
-
-async function loadHandTracker() {
-  if (handLandmarker) return handLandmarker;
-
-  say("Loading hand gesture model. Please wait...");
-  $("handStatus").textContent = "LOADING";
-
-  const vision = await import(
+  const vision=await import(
     "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/+esm"
   );
-
-  const files = await vision.FilesetResolver.forVisionTasks(
+  const files=await vision.FilesetResolver.forVisionTasks(
     "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm"
   );
-
-  handLandmarker = await vision.HandLandmarker.createFromOptions(files, {
-    baseOptions: {
-      modelAssetPath:
-        "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task",
-      delegate: "GPU"
+  handLandmarker=await vision.HandLandmarker.createFromOptions(files,{
+    baseOptions:{
+      modelAssetPath:"https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task",
+      delegate:"CPU"
     },
-    runningMode: "VIDEO",
-    numHands: 1
+    runningMode:"VIDEO",
+    numHands:1
   });
-
-  visionReady = true;
-  $("handStatus").textContent = "READY";
   return handLandmarker;
 }
 
-async function startCamera() {
-  $("startCamera").disabled = true;
-  $("cameraStatus").textContent = "STARTING";
-  $("systemStatus").textContent = "● INITIALIZING CAMERA";
-  say("Loading hand gesture mode...");
+async function startCamera(){
+  $("startCamera").disabled=true;
+  $("cameraStatus").textContent="STARTING";
+  $("systemStatus").textContent="● STARTING CAMERA";
+  say("Requesting camera access...");
 
-  try {
-    if (!navigator.mediaDevices?.getUserMedia) {
-      throw new Error("Camera API unavailable. Open this site over HTTPS in Chrome.");
+  try{
+    if(!window.isSecureContext){
+      throw new Error("This page is not secure. Open the HTTPS GitHub Pages URL.");
+    }
+    if(!navigator.mediaDevices?.getUserMedia){
+      throw new Error("Camera API unavailable. Use an updated Chrome browser.");
     }
 
-    // Ask for camera permission first.
-    cameraStream = await navigator.mediaDevices.getUserMedia({
-      audio: false,
-      video: { facingMode: "user" }
+    // Do not force a particular camera or facing mode.
+    // First enumerate available devices; then request the default camera.
+    let devices=await navigator.mediaDevices.enumerateDevices();
+    let cameras=devices.filter(d=>d.kind==="videoinput");
+
+    if(cameras.length===0){
+      say("No camera listed yet. Requesting the browser's default camera...");
+    }
+
+    cameraStream=await navigator.mediaDevices.getUserMedia({
+      audio:false,
+      video:true
     });
 
-    video.srcObject = cameraStream;
+    video.srcObject=cameraStream;
     await video.play();
 
-    // Show camera is on before loading the gesture model.
-    $("cameraStatus").textContent = "ON";
-    $("stopCamera").disabled = false;
-    $("systemStatus").textContent = "● CAMERA ACTIVE";
-    say("Camera is on. Loading hand tracking model...");
+    $("cameraStatus").textContent="ON";
+    $("systemStatus").textContent="● CAMERA ACTIVE";
+    $("stopCamera").disabled=false;
+    say("Camera is on. Loading hand tracking...");
 
     await loadHandTracker();
 
-    tracking = true;
-    lastVideoTime = -1;
-    previousPinch = null;
-    lastHandX = null;
-    lastHandY = null;
-    $("handStatus").textContent = "TRACKING";
-    say("Hand gesture mode active. Move your index finger in front of the camera.");
+    tracking=true;
+    lastVideoTime=-1;
+    previousPinch=null;
+    lastHandX=null;
+    lastHandY=null;
+    $("handStatus").textContent="SEARCHING";
+    say("Hand tracking active. Show your hand to the camera.");
     trackHands();
-  } catch (err) {
-    console.error("JARVIS CAMERA ERROR:", err);
+  }catch(err){
+    console.error("JARVIS CAMERA ERROR:",err);
+    tracking=false;
 
-    tracking = false;
-    if (cameraStream) {
-      cameraStream.getTracks().forEach(track => track.stop());
-      cameraStream = null;
+    if(cameraStream){
+      cameraStream.getTracks().forEach(t=>t.stop());
+      cameraStream=null;
     }
-    video.srcObject = null;
+    video.srcObject=null;
 
-    $("cameraStatus").textContent = "ERROR";
-    $("handStatus").textContent = "FAILED";
-    $("systemStatus").textContent = "● CAMERA ERROR";
-    $("stopCamera").disabled = true;
+    $("cameraStatus").textContent="ERROR";
+    $("handStatus").textContent="FAILED";
+    $("systemStatus").textContent="● ERROR";
+    $("stopCamera").disabled=true;
+    $("startCamera").disabled=false;
 
-    let details = err?.message || String(err);
-    if (err?.name === "NotAllowedError") {
-      details = "Camera permission denied. Allow camera access in Chrome site settings and Windows Settings.";
-    } else if (err?.name === "NotFoundError") {
-      details = "No camera found. Connect or enable a webcam.";
-    } else if (err?.name === "NotReadableError") {
-      details = "Camera is busy or unavailable. Close other camera apps and try again.";
-    } else if (err?.name === "OverconstrainedError") {
-      details = "Camera does not support the requested settings. Try the default camera.";
-    } else if (err?.name === "SecurityError") {
-      details = "Browser blocked camera access. Use HTTPS and allow camera permission.";
+    let detail=err?.message||String(err);
+    if(err?.name==="NotFoundError"){
+      detail="No camera detected. Check Windows Camera app, connect a webcam, then reload.";
+    }else if(err?.name==="NotAllowedError"){
+      detail="Camera blocked. Allow camera access in Chrome site settings and Windows Settings.";
+    }else if(err?.name==="NotReadableError"){
+      detail="Camera is busy. Close Camera, Teams, Zoom or other apps using it.";
+    }else if(err?.name==="OverconstrainedError"){
+      detail="Camera settings unsupported. Check whether your webcam is enabled.";
+    }else if(err?.name==="SecurityError"){
+      detail="Browser security blocked camera access. Open the HTTPS site.";
     }
 
-    say("ERROR (" + (err?.name || "UnknownError") + "): " + details);
-    $("startCamera").disabled = false;
+    say("ERROR "+(err?.name||"Unknown")+": "+detail);
   }
 }
 
-function trackHands() {
-  if (!tracking || !handLandmarker) return;
-
-  if (video.readyState >= 2 && video.currentTime !== lastVideoTime) {
-    lastVideoTime = video.currentTime;
-
-    try {
-      const result = handLandmarker.detectForVideo(video, performance.now());
-      const hand = result.landmarks?.[0];
-
-      if (hand) {
-        const wrist = hand[0];
-        const thumbTip = hand[4];
-        const indexTip = hand[8];
-
-        if (lastHandX !== null) {
-          const dx = indexTip.x - lastHandX;
-          const dy = indexTip.y - lastHandY;
-          rotation -= dx * 5;
-          tilt += dy * 3;
+function trackHands(){
+  if(!tracking||!handLandmarker)return;
+  if(video.readyState>=2&&video.currentTime!==lastVideoTime){
+    lastVideoTime=video.currentTime;
+    try{
+      const result=handLandmarker.detectForVideo(video,performance.now());
+      const hand=result.landmarks?.[0];
+      if(hand){
+        const thumb=hand[4],index=hand[8];
+        if(lastHandX!==null){
+          rotation-=(index.x-lastHandX)*5;
+          tilt+=(index.y-lastHandY)*3;
         }
+        lastHandX=index.x;lastHandY=index.y;
 
-        lastHandX = indexTip.x;
-        lastHandY = indexTip.y;
-
-        const pinchDistance = Math.hypot(
-          thumbTip.x - indexTip.x,
-          thumbTip.y - indexTip.y
-        );
-
-        if (previousPinch !== null) {
-          const difference = pinchDistance - previousPinch;
-          zoom = Math.max(0.6, Math.min(2.5, zoom + difference * 2));
-          $("zoom").value = String(zoom);
+        const pinch=Math.hypot(thumb.x-index.x,thumb.y-index.y);
+        if(previousPinch!==null){
+          zoom=Math.max(.6,Math.min(2.5,zoom+(pinch-previousPinch)*2));
+          $("zoom").value=String(zoom);
         }
-
-        previousPinch = pinchDistance;
-        $("handStatus").textContent = "HAND DETECTED";
-        if (performance.now() - lastTrackTime > 1000) {
-          say("Hand detected. Move your index finger to rotate; pinch to zoom.");
-          lastTrackTime = performance.now();
-        }
-      } else {
-        lastHandX = null;
-        lastHandY = null;
-        previousPinch = null;
-        $("handStatus").textContent = "SEARCHING";
+        previousPinch=pinch;
+        $("handStatus").textContent="HAND DETECTED";
+      }else{
+        lastHandX=null;lastHandY=null;previousPinch=null;
+        $("handStatus").textContent="SEARCHING";
       }
-    } catch (err) {
-      console.error("Hand tracking error:", err);
-      $("handStatus").textContent = "TRACK ERROR";
+    }catch(err){
+      console.error("HAND TRACKING ERROR:",err);
+      $("handStatus").textContent="TRACK ERROR";
+      say("Hand tracking error: "+(err.message||err));
     }
   }
-
-  frameId = requestAnimationFrame(trackHands);
+  frameId=requestAnimationFrame(trackHands);
 }
 
-function stopCamera() {
-  tracking = false;
+function stopCamera(){
+  tracking=false;
   cancelAnimationFrame(frameId);
-
-  if (cameraStream) {
-    cameraStream.getTracks().forEach(track => track.stop());
-    cameraStream = null;
+  if(cameraStream){
+    cameraStream.getTracks().forEach(t=>t.stop());
+    cameraStream=null;
   }
-
-  video.srcObject = null;
-  lastHandX = null;
-  lastHandY = null;
-  previousPinch = null;
-
-  $("cameraStatus").textContent = "OFFLINE";
-  $("handStatus").textContent = "STANDBY";
-  $("systemStatus").textContent = "● SYSTEM ONLINE";
-  $("stopCamera").disabled = true;
-  $("startCamera").disabled = false;
+  video.srcObject=null;
+  lastHandX=null;lastHandY=null;previousPinch=null;
+  $("cameraStatus").textContent="OFFLINE";
+  $("handStatus").textContent="STANDBY";
+  $("systemStatus").textContent="● SYSTEM ONLINE";
+  $("stopCamera").disabled=true;
+  $("startCamera").disabled=false;
   say("Camera stopped.");
 }
 
-$("startCamera").addEventListener("click", startCamera);
-$("stopCamera").addEventListener("click", stopCamera);
+$("startCamera").addEventListener("click",startCamera);
+$("stopCamera").addEventListener("click",stopCamera);
+window.addEventListener("resize",resize);
+window.addEventListener("beforeunload",()=>{
+  if(cameraStream)cameraStream.getTracks().forEach(t=>t.stop());
+  if(image?.objectURL)URL.revokeObjectURL(image.objectURL);
+});
 
-window.addEventListener("resize", resize);
 resize();
 animate();
-
-if (!navigator.mediaDevices?.getUserMedia) {
-  say("Camera API unavailable. Open the site over HTTPS in a modern browser.");
-}
-
-window.addEventListener("beforeunload", () => {
-  if (cameraStream) cameraStream.getTracks().forEach(track => track.stop());
-  if (image?._objectURL) URL.revokeObjectURL(image._objectURL);
-});
 </script>
 </body>
 </html>
