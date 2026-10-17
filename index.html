@@ -1,383 +1,212 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>J.A.R.V.I.S. | AI Command Center</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>J.A.R.V.I.S. | Arc Reactor</title>
 <style>
-:root{--cyan:#00eaff;--blue:#087cff;--bg:#030913;--panel:rgba(4,22,39,.9)}
 *{box-sizing:border-box}
-body{margin:0;background:radial-gradient(ellipse at center,#09233b,#030913 70%);color:#c9faff;font-family:Arial,sans-serif;min-height:100vh}
-header{padding:22px 5%;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;border-bottom:1px solid #00eaff55}
-.logo{font-size:clamp(20px,4vw,30px);font-weight:bold;letter-spacing:5px;color:var(--cyan);text-shadow:0 0 15px #00eaff}
-.status{font-size:11px;letter-spacing:2px;color:#74ffc2}
-main{max-width:1250px;margin:auto;padding:25px 18px}
-h1{font-size:clamp(24px,4vw,38px);letter-spacing:3px;margin-bottom:5px}
-.subtitle{color:#7eacbf;font-size:12px;letter-spacing:2px}
-.grid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(240px,1fr);gap:18px;margin-top:25px}
-.panel{background:var(--panel);border:1px solid #00d9ff55;border-radius:12px;padding:18px;box-shadow:0 0 25px #007ca51a;min-width:0}
-.panel h2{font-size:14px;color:var(--cyan);letter-spacing:2px;margin:0 0 15px}
-.viewer{height:390px;position:relative;background:radial-gradient(ellipse,#0b2e46,#020811 70%);border:1px solid #00eaff33;border-radius:8px;overflow:hidden}
-#view{width:100%;height:100%;display:block;touch-action:none}
-.overlay{position:absolute;top:12px;left:12px;font-size:10px;color:#5deaff;letter-spacing:2px;pointer-events:none}
-.hint{position:absolute;bottom:10px;left:0;right:0;text-align:center;color:#83b9ca;font-size:11px;pointer-events:none}
-.controls{display:flex;flex-wrap:wrap;gap:9px;margin-top:14px}
-button,.upload{background:#06233a;color:var(--cyan);border:1px solid #00cfff88;padding:11px 14px;border-radius:5px;cursor:pointer;font-size:11px;letter-spacing:1px}
-button:hover,.upload:hover{background:#0b3b59}
-button:disabled{opacity:.5;cursor:wait}
-input[type=file]{display:none}
-input[type=range]{width:100%;accent-color:var(--cyan)}
-#message{font-size:12px;line-height:1.6;color:#9bd5e3;overflow-wrap:anywhere;margin-top:12px;min-height:38px}
-.readouts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.readout{border:1px solid #00eaff22;padding:13px;border-radius:6px}
-.readout small{display:block;color:#6f9eaf;font-size:10px;letter-spacing:1px;margin-bottom:8px}
-.readout strong{font-size:14px;color:var(--cyan);overflow-wrap:anywhere}
-.line{height:1px;background:#00eaff26;margin:18px 0}
-#video{position:fixed;left:-9999px;width:320px;height:240px;opacity:0;pointer-events:none}
-.footer{text-align:center;padding:30px;color:#537e91;font-size:10px;letter-spacing:2px}
-ul{padding-left:17px;color:#91bdca;font-size:12px;line-height:2}
-@media(max-width:760px){.grid{grid-template-columns:1fr}.viewer{height:320px}header{padding:18px}.panel{padding:13px}}
+body{margin:0;overflow:hidden;background:radial-gradient(circle,#092849,#020711 65%,#000);color:#65eaff;font-family:Consolas,monospace}
+#hud{position:fixed;inset:0;pointer-events:none;background:linear-gradient(transparent 49.9%,#29caff12 50%,transparent 50.1%),linear-gradient(90deg,transparent 49.9%,#29caff12 50%,transparent 50.1%);background-size:100% 100%}
+header{position:absolute;top:24px;left:28px;right:28px;display:flex;justify-content:space-between;letter-spacing:3px;font-size:14px}
+small{display:block;font-size:9px;margin-top:8px;letter-spacing:2px;color:#429bbd}
+#status{text-align:right;font-size:10px;line-height:2}
+#reactor{position:absolute;width:min(72vw,72vh,580px);aspect-ratio:1;left:50%;top:50%;transform:translate(-50%,-50%);filter:drop-shadow(0 0 20px #008cff);transition:filter .2s}
+svg{width:100%;height:100%}
+.spin{transform-origin:300px 300px;animation:spin 18s linear infinite}
+.reverse{transform-origin:300px 300px;animation:spin 12s linear infinite reverse}
+.pulse{animation:pulse 2s ease-in-out infinite alternate;transform-origin:300px 300px}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{from{opacity:.6;transform:scale(.97)}to{opacity:1;transform:scale(1.03)}}
+#reactor.active{filter:drop-shadow(0 0 45px #00d9ff)}
+#label{position:absolute;top:calc(50% + min(36vw,36vh,290px));left:50%;transform:translateX(-50%);font-size:10px;letter-spacing:4px;white-space:nowrap}
+#bottom{position:absolute;bottom:24px;left:24px;right:24px;display:flex;justify-content:space-between;align-items:end;gap:12px}
+button{background:#061b30;color:#72eaff;border:1px solid #168ab8;padding:10px;font:10px Consolas;letter-spacing:1px;cursor:pointer}
+button:hover{background:#10405b}
+#buttons{display:flex;flex-wrap:wrap;gap:7px;max-width:75%}
+#message{font-size:10px;text-align:right;max-width:260px;line-height:1.7}
+#video{position:fixed;right:20px;bottom:100px;width:130px;opacity:.18;transform:scaleX(-1);display:none}
+@media(max-width:650px){header{left:15px;right:15px;top:15px;font-size:11px}#bottom{left:12px;right:12px;bottom:12px;display:block}#buttons{max-width:100%;margin-bottom:12px}#message{text-align:left;max-width:100%}#reactor{width:88vw}#label{top:calc(50% + 42vw);font-size:8px}}
 </style>
 </head>
 <body>
+<div id="hud"></div>
 <header>
-  <div class="logo">J.A.R.V.I.S.</div>
-  <div class="status" id="systemStatus">● SYSTEM ONLINE</div>
+<div>J.A.R.V.I.S.<small>JUST A RATHER VERY INTELLIGENT SYSTEM</small></div>
+<div id="status">SYSTEM: <span id="sys">STANDBY</span><br>ARC CORE: ONLINE<br>CAMERA: <span id="cam">OFFLINE</span></div>
 </header>
 
-<main>
-  <h1>AI COMMAND INTERFACE</h1>
-  <div class="subtitle">PERSONAL ASSISTANT // HOLOGRAPHIC OBJECT LAB</div>
+<div id="reactor">
+<svg viewBox="0 0 600 600">
+<defs>
+<radialGradient id="core"><stop stop-color="white"/><stop offset=".22" stop-color="#a9ffff"/><stop offset=".55" stop-color="#12cfff"/><stop offset="1" stop-color="#06418d"/></radialGradient>
+<linearGradient id="ring"><stop stop-color="#d8ffff"/><stop offset=".5" stop-color="#0aa9ff"/><stop offset="1" stop-color="#62f3ff"/></linearGradient>
+<filter id="glow"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+</defs>
+<circle cx="300" cy="300" r="282" fill="none" stroke="#1267a0" stroke-dasharray="2 12"/>
+<g class="spin" fill="none" stroke="url(#ring)" filter="url(#glow)">
+<circle cx="300" cy="300" r="250" stroke-width="3" stroke-dasharray="65 12 18 8"/>
+<circle cx="300" cy="300" r="224" stroke-width="2" stroke-dasharray="3 9"/>
+<circle cx="300" cy="300" r="196" stroke-width="8" stroke-dasharray="90 14 25 12"/>
+<path d="M300 30V85 M300 515V570 M30 300H85 M515 300H570" stroke-width="4"/>
+</g>
+<g class="reverse" fill="none" stroke="#4aeaff" filter="url(#glow)">
+<circle cx="300" cy="300" r="170" stroke-width="2" stroke-dasharray="22 7 4 7"/>
+<circle cx="300" cy="300" r="151" stroke-width="7" stroke-dasharray="35 10"/>
+</g>
+<g class="pulse">
+<circle cx="300" cy="300" r="130" fill="#041b3a" stroke="#6af3ff" stroke-width="3" filter="url(#glow)"/>
+<circle cx="300" cy="300" r="108" fill="none" stroke="#1ab9ff" stroke-width="7" stroke-dasharray="20 7"/>
+<path d="M300 210L325 253L366 260L340 295L350 337L300 318L250 337L260 295L234 260L275 253Z" fill="#0878c9" stroke="#6ff7ff" stroke-width="3"/>
+<circle cx="300" cy="300" r="68" fill="url(#core)" filter="url(#glow)"/>
+<circle cx="300" cy="300" r="40" fill="none" stroke="white" stroke-width="2"/>
+<circle cx="300" cy="300" r="15" fill="white"/>
+</g>
+<g fill="#a8faff"><circle cx="300" cy="70" r="4"/><circle cx="300" cy="530" r="4"/><circle cx="70" cy="300" r="4"/><circle cx="530" cy="300" r="4"/></g>
+</svg>
+</div>
+<div id="label">ARC REACTOR // ONLINE</div>
+<video id="video" autoplay playsinline muted></video>
 
-  <div class="grid">
-    <section class="panel">
-      <h2>01 / OBJECT VIEWER</h2>
-      <div class="viewer">
-        <canvas id="view"></canvas>
-        <div class="overlay">LIVE VISUALIZATION</div>
-        <div class="hint" id="hint">UPLOAD A PHOTO TO BEGIN</div>
-      </div>
-      <div class="controls">
-        <label class="upload" for="photo">UPLOAD PHOTO</label>
-        <input id="photo" type="file" accept="image/*">
-        <button id="reset">RESET VIEW</button>
-        <button id="auto">AUTO ROTATE: OFF</button>
-      </div>
-      <div class="line"></div>
-      <label for="zoom" style="font-size:11px">VIEW ZOOM</label>
-      <input id="zoom" type="range" min="0.6" max="2.5" step="0.05" value="1">
-      <div id="message" role="status" aria-live="polite">System ready. Upload an image to begin.</div>
-    </section>
+<div id="bottom">
+<div id="buttons">
+<button id="cameraBtn">START HAND TRACKING</button>
+<button id="voiceBtn">ACTIVATE VOICE</button>
+<button onclick="center()">RECENTER</button>
+<button onclick="pulse()">ARC PULSE</button>
+<button onclick="fullscreen()">FULLSCREEN</button>
+</div>
+<div id="message">JARVIS: At your service, sir.</div>
+</div>
 
-    <aside class="panel">
-      <h2>02 / SYSTEM TELEMETRY</h2>
-      <div class="readouts">
-        <div class="readout"><small>RENDER ENGINE</small><strong id="renderStatus">READY</strong></div>
-        <div class="readout"><small>CAMERA</small><strong id="cameraStatus">OFFLINE</strong></div>
-        <div class="readout"><small>HAND TRACKING</small><strong id="handStatus">STANDBY</strong></div>
-        <div class="readout"><small>OBJECT MODE</small><strong>PHOTO PLANE</strong></div>
-      </div>
-      <div class="line"></div>
-      <h2>03 / GESTURE CONTROL</h2>
-      <div class="controls">
-        <button id="startCamera">START CAMERA</button>
-        <button id="stopCamera" disabled>STOP CAMERA</button>
-      </div>
-      <ul>
-        <li>Move your index finger to rotate.</li>
-        <li>Pinch thumb and index finger to zoom.</li>
-        <li>Drag with mouse or touch to rotate.</li>
-        <li>Use the slider for manual zoom.</li>
-      </ul>
-      <div class="line"></div>
-      <h2>04 / COMMAND PROTOCOL</h2>
-      <div style="font-size:12px;line-height:2;color:#91bdca">
-        <div>● Image upload: READY</div>
-        <div>● Gesture engine: ON DEMAND</div>
-        <div>● Camera: BROWSER PERMISSION</div>
-        <div>● True AI 3D: NOT CONNECTED</div>
-      </div>
-    </aside>
-  </div>
-</main>
+<script>
+const reactor=document.getElementById('reactor');
+const message=document.getElementById('message');
+const video=document.getElementById('video');
+let stream=null,tracking=false,voice=false,recognition=null;
+let tx=.5,ty=.5,x=.5,y=.5,lastPulse=0;
 
-<video id="video" autoplay muted playsinline></video>
-<div class="footer">J.A.R.V.I.S. INTERFACE // EXPERIMENTAL VISUAL SYSTEM</div>
-
-<script type="module">
-const $ = id => document.getElementById(id);
-const canvas = $("view");
-const ctx = canvas.getContext("2d");
-const video = $("video");
-const message = $("message");
-
-let image = null, rotation = 0, tilt = 0, zoom = 1;
-let autoRotate = false, dragging = false, lastX = 0, lastY = 0;
-let cameraStream = null, handLandmarker = null, tracking = false;
-let frameId = 0, lastVideoTime = -1;
-let lastHandX = null, lastHandY = null, previousPinch = null;
-
-function say(text){message.textContent=text;}
-
-function resize(){
-  const r=canvas.getBoundingClientRect();
-  const d=Math.min(window.devicePixelRatio||1,2);
-  canvas.width=Math.max(1,Math.round(r.width*d));
-  canvas.height=Math.max(1,Math.round(r.height*d));
-  draw();
+function say(t,speak=true){
+ message.textContent='JARVIS: '+t;
+ if(speak&&'speechSynthesis'in window){
+  speechSynthesis.cancel();
+  let u=new SpeechSynthesisUtterance(t);
+  u.rate=1.05;u.pitch=.9;speechSynthesis.speak(u);
+ }
 }
-
-function draw(){
-  const w=canvas.width,h=canvas.height;
-  if(!w||!h)return;
-  ctx.clearRect(0,0,w,h);
-  ctx.save();
-  ctx.translate(w/2,h/2);
-  ctx.scale(Math.min(w,h)/300*zoom,Math.min(w,h)/300*zoom);
-
-  ctx.strokeStyle="rgba(0,234,255,.18)";
-  ctx.lineWidth=.7/zoom;
-  for(let r=55;r<=130;r+=25){
-    ctx.beginPath();
-    ctx.ellipse(0,0,r,r*.32,0,0,Math.PI*2);
-    ctx.stroke();
-  }
-
-  if(image){
-    ctx.save();
-    ctx.rotate(rotation);
-    ctx.transform(1,0,Math.sin(tilt)*.25,1,0,0);
-    const ratio=Math.min(190/image.width,190/image.height);
-    const iw=image.width*ratio,ih=image.height*ratio;
-    ctx.shadowColor="#00eaff";
-    ctx.shadowBlur=18;
-    ctx.drawImage(image,-iw/2,-ih/2,iw,ih);
-    ctx.shadowBlur=0;
-    ctx.strokeStyle="#00eaff";
-    ctx.lineWidth=1;
-    ctx.strokeRect(-iw/2,-ih/2,iw,ih);
-    ctx.restore();
-  }else{
-    ctx.strokeStyle="#00eaff";
-    ctx.lineWidth=1.5;
-    ctx.beginPath();ctx.arc(0,0,42,0,Math.PI*2);ctx.stroke();
-    ctx.fillStyle="#00eaff";ctx.font="10px Arial";ctx.textAlign="center";
-    ctx.fillText("JARVIS",0,4);
-  }
-  ctx.restore();
+function center(){tx=.5;ty=.5;say('Arc reactor centered.')}
+function pulse(){
+ reactor.classList.add('active');
+ say('Arc reactor energy pulse initiated.');
+ setTimeout(()=>reactor.classList.remove('active'),900);
 }
-
+function fullscreen(){
+ if(!document.fullscreenElement)document.documentElement.requestFullscreen?.().catch(()=>{});
+ else document.exitFullscreen?.();
+}
+function move(a,b){
+ tx=Math.max(.12,Math.min(.88,a));
+ ty=Math.max(.18,Math.min(.8,b));
+}
+document.addEventListener('pointermove',e=>{
+ if(!tracking)move(e.clientX/innerWidth,e.clientY/innerHeight);
+});
 function animate(){
-  if(autoRotate&&!dragging&&!tracking)rotation+=.006;
-  draw();
-  requestAnimationFrame(animate);
+ x+=(tx-x)*.12;y+=(ty-y)*.12;
+ reactor.style.left=(x*100)+'%';
+ reactor.style.top=(y*100)+'%';
+ requestAnimationFrame(animate);
 }
-
-$("photo").addEventListener("change",e=>{
-  const file=e.target.files?.[0];
-  if(!file)return;
-  if(!file.type.startsWith("image/")){say("Please select an image file.");return;}
-  const url=URL.createObjectURL(file),img=new Image();
-  img.onload=()=>{
-    if(image?.objectURL)URL.revokeObjectURL(image.objectURL);
-    img.objectURL=url;image=img;rotation=0;tilt=0;
-    $("hint").textContent="IMAGE LOADED // READY FOR GESTURES";
-    say("Image loaded. Drag to rotate or start the camera.");
-    draw();
-  };
-  img.onerror=()=>{URL.revokeObjectURL(url);say("Image failed to load.");};
-  img.src=url;
-});
-
-$("reset").onclick=()=>{rotation=0;tilt=0;zoom=1;$("zoom").value="1";draw();say("View reset.");};
-$("auto").onclick=()=>{
-  autoRotate=!autoRotate;
-  $("auto").textContent="AUTO ROTATE: "+(autoRotate?"ON":"OFF");
-};
-$("zoom").oninput=e=>{zoom=Number(e.target.value);draw();};
-
-canvas.addEventListener("pointerdown",e=>{
-  dragging=true;lastX=e.clientX;lastY=e.clientY;
-  canvas.setPointerCapture(e.pointerId);
-});
-canvas.addEventListener("pointermove",e=>{
-  if(!dragging)return;
-  rotation+=(e.clientX-lastX)*.01;
-  tilt+=(e.clientY-lastY)*.008;
-  lastX=e.clientX;lastY=e.clientY;draw();
-});
-canvas.addEventListener("pointerup",()=>dragging=false);
-canvas.addEventListener("pointercancel",()=>dragging=false);
-canvas.addEventListener("wheel",e=>{
-  e.preventDefault();
-  zoom=Math.max(.6,Math.min(2.5,zoom-e.deltaY*.001));
-  $("zoom").value=String(zoom);draw();
-},{passive:false});
-
-async function loadHandTracker(){
-  if(handLandmarker)return handLandmarker;
-  $("handStatus").textContent="LOADING";
-  say("Loading hand tracking model. Please wait...");
-
-  const vision=await import(
-    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/+esm"
-  );
-  const files=await vision.FilesetResolver.forVisionTasks(
-    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm"
-  );
-  handLandmarker=await vision.HandLandmarker.createFromOptions(files,{
-    baseOptions:{
-      modelAssetPath:"https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task",
-      delegate:"CPU"
-    },
-    runningMode:"VIDEO",
-    numHands:1
-  });
-  return handLandmarker;
-}
+animate();
 
 async function startCamera(){
-  $("startCamera").disabled=true;
-  $("cameraStatus").textContent="STARTING";
-  $("systemStatus").textContent="● STARTING CAMERA";
-  say("Requesting camera access...");
-
-  try{
-    if(!window.isSecureContext){
-      throw new Error("This page is not secure. Open the HTTPS GitHub Pages URL.");
+ try{
+  stream=await navigator.mediaDevices.getUserMedia({video:true,audio:false});
+  video.srcObject=stream;await video.play();
+  video.style.display='block';
+  document.getElementById('cam').textContent='CONNECTED';
+  say('Camera connected. Loading hand tracking.',false);
+  const mp=await import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14');
+  const files=await mp.FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm');
+  const hands=await mp.HandLandmarker.createFromOptions(files,{
+   baseOptions:{modelAssetPath:'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task'},
+   runningMode:'VIDEO',numHands:1
+  });
+  tracking=true;
+  document.getElementById('cameraBtn').textContent='STOP HAND TRACKING';
+  document.getElementById('sys').textContent='ACTIVE';
+  say('Hand tracking online. Move your hand to control the reactor.');
+  function detect(){
+   if(!tracking)return;
+   if(video.readyState>=2){
+    const result=hands.detectForVideo(video,performance.now());
+    if(result.landmarks&&result.landmarks.length){
+     const p=result.landmarks[0];
+     move(1-p[9].x,p[9].y);
+     const tips=[8,12,16,20],bases=[5,9,13,17];
+     let extended=0;
+     for(let i=0;i<4;i++)if(p[tips[i]].y<p[bases[i]].y)extended++;
+     if(extended===0&&Date.now()-lastPulse>1800){lastPulse=Date.now();pulse();}
     }
-    if(!navigator.mediaDevices?.getUserMedia){
-      throw new Error("Camera API unavailable. Use an updated Chrome browser.");
-    }
-
-    // Do not force a particular camera or facing mode.
-    // First enumerate available devices; then request the default camera.
-    let devices=await navigator.mediaDevices.enumerateDevices();
-    let cameras=devices.filter(d=>d.kind==="videoinput");
-
-    if(cameras.length===0){
-      say("No camera listed yet. Requesting the browser's default camera...");
-    }
-
-    cameraStream=await navigator.mediaDevices.getUserMedia({
-      audio:false,
-      video:true
-    });
-
-    video.srcObject=cameraStream;
-    await video.play();
-
-    $("cameraStatus").textContent="ON";
-    $("systemStatus").textContent="● CAMERA ACTIVE";
-    $("stopCamera").disabled=false;
-    say("Camera is on. Loading hand tracking...");
-
-    await loadHandTracker();
-
-    tracking=true;
-    lastVideoTime=-1;
-    previousPinch=null;
-    lastHandX=null;
-    lastHandY=null;
-    $("handStatus").textContent="SEARCHING";
-    say("Hand tracking active. Show your hand to the camera.");
-    trackHands();
-  }catch(err){
-    console.error("JARVIS CAMERA ERROR:",err);
-    tracking=false;
-
-    if(cameraStream){
-      cameraStream.getTracks().forEach(t=>t.stop());
-      cameraStream=null;
-    }
-    video.srcObject=null;
-
-    $("cameraStatus").textContent="ERROR";
-    $("handStatus").textContent="FAILED";
-    $("systemStatus").textContent="● ERROR";
-    $("stopCamera").disabled=true;
-    $("startCamera").disabled=false;
-
-    let detail=err?.message||String(err);
-    if(err?.name==="NotFoundError"){
-      detail="No camera detected. Check Windows Camera app, connect a webcam, then reload.";
-    }else if(err?.name==="NotAllowedError"){
-      detail="Camera blocked. Allow camera access in Chrome site settings and Windows Settings.";
-    }else if(err?.name==="NotReadableError"){
-      detail="Camera is busy. Close Camera, Teams, Zoom or other apps using it.";
-    }else if(err?.name==="OverconstrainedError"){
-      detail="Camera settings unsupported. Check whether your webcam is enabled.";
-    }else if(err?.name==="SecurityError"){
-      detail="Browser security blocked camera access. Open the HTTPS site.";
-    }
-
-    say("ERROR "+(err?.name||"Unknown")+": "+detail);
+   }
+   requestAnimationFrame(detect);
   }
+  detect();
+ }catch(e){
+  document.getElementById('cam').textContent='ERROR';
+  say('Camera error: '+e.name+'. Check Chrome camera permissions and close other camera apps.',false);
+  console.error(e);
+  if(stream)stream.getTracks().forEach(t=>t.stop());
+  stream=null;
+ }
 }
-
-function trackHands(){
-  if(!tracking||!handLandmarker)return;
-  if(video.readyState>=2&&video.currentTime!==lastVideoTime){
-    lastVideoTime=video.currentTime;
-    try{
-      const result=handLandmarker.detectForVideo(video,performance.now());
-      const hand=result.landmarks?.[0];
-      if(hand){
-        const thumb=hand[4],index=hand[8];
-        if(lastHandX!==null){
-          rotation-=(index.x-lastHandX)*5;
-          tilt+=(index.y-lastHandY)*3;
-        }
-        lastHandX=index.x;lastHandY=index.y;
-
-        const pinch=Math.hypot(thumb.x-index.x,thumb.y-index.y);
-        if(previousPinch!==null){
-          zoom=Math.max(.6,Math.min(2.5,zoom+(pinch-previousPinch)*2));
-          $("zoom").value=String(zoom);
-        }
-        previousPinch=pinch;
-        $("handStatus").textContent="HAND DETECTED";
-      }else{
-        lastHandX=null;lastHandY=null;previousPinch=null;
-        $("handStatus").textContent="SEARCHING";
-      }
-    }catch(err){
-      console.error("HAND TRACKING ERROR:",err);
-      $("handStatus").textContent="TRACK ERROR";
-      say("Hand tracking error: "+(err.message||err));
-    }
-  }
-  frameId=requestAnimationFrame(trackHands);
-}
-
 function stopCamera(){
-  tracking=false;
-  cancelAnimationFrame(frameId);
-  if(cameraStream){
-    cameraStream.getTracks().forEach(t=>t.stop());
-    cameraStream=null;
-  }
-  video.srcObject=null;
-  lastHandX=null;lastHandY=null;previousPinch=null;
-  $("cameraStatus").textContent="OFFLINE";
-  $("handStatus").textContent="STANDBY";
-  $("systemStatus").textContent="● SYSTEM ONLINE";
-  $("stopCamera").disabled=true;
-  $("startCamera").disabled=false;
-  say("Camera stopped.");
+ tracking=false;
+ if(stream)stream.getTracks().forEach(t=>t.stop());
+ stream=null;video.style.display='none';
+ document.getElementById('cam').textContent='OFFLINE';
+ document.getElementById('cameraBtn').textContent='START HAND TRACKING';
+ say('Hand tracking stopped. Pointer control active.');
 }
+document.getElementById('cameraBtn').onclick=()=>tracking?stopCamera():startCamera();
 
-$("startCamera").addEventListener("click",startCamera);
-$("stopCamera").addEventListener("click",stopCamera);
-window.addEventListener("resize",resize);
-window.addEventListener("beforeunload",()=>{
-  if(cameraStream)cameraStream.getTracks().forEach(t=>t.stop());
-  if(image?.objectURL)URL.revokeObjectURL(image.objectURL);
+function runCommand(s){
+ s=s.toLowerCase();
+ if(s.includes('time'))say('The time is '+new Date().toLocaleTimeString());
+ else if(s.includes('date'))say('Today is '+new Date().toLocaleDateString());
+ else if(s.includes('hello')||s.includes('jarvis'))say('At your service, sir.');
+ else if(s.includes('center')||s.includes('reset'))center();
+ else if(s.includes('pulse')||s.includes('power up'))pulse();
+ else if(s.includes('fullscreen'))fullscreen();
+ else if(s.includes('study mode'))say('Study mode activated.');
+ else if(s.includes('coding mode'))say('Coding mode activated.');
+ else if(s.includes('open youtube')){say('Opening YouTube.');window.open('https://youtube.com','_blank');}
+ else if(s.includes('open google')){say('Opening Google.');window.open('https://google.com','_blank');}
+ else if(s.includes('open github')){say('Opening GitHub.');window.open('https://github.com','_blank');}
+ else say('Command received: '+s);
+}
+function startVoice(){
+ const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(!SR){say('Voice recognition is not supported in this browser.');return}
+ recognition=new SR();
+ recognition.lang='en-US';recognition.continuous=true;recognition.interimResults=false;
+ recognition.onstart=()=>{voice=true;document.getElementById('voiceBtn').textContent='STOP VOICE';say('Voice control active. I am listening.',false)};
+ recognition.onresult=e=>runCommand(e.results[e.results.length-1][0].transcript);
+ recognition.onerror=e=>say('Voice error: '+e.error);
+ recognition.onend=()=>{if(voice)try{recognition.start()}catch(e){}};
+ try{recognition.start()}catch(e){say('Could not start voice input.')}
+}
+function stopVoice(){
+ voice=false;
+ if(recognition){recognition.onend=null;recognition.stop();recognition=null}
+ document.getElementById('voiceBtn').textContent='ACTIVATE VOICE';
+ say('Voice control stopped.',false);
+}
+document.getElementById('voiceBtn').onclick=()=>voice?stopVoice():startVoice();
+document.addEventListener('keydown',e=>{
+ if(e.key.toLowerCase()==='c')center();
+ if(e.key.toLowerCase()==='p')pulse();
 });
-
-resize();
-animate();
 </script>
 </body>
 </html>
